@@ -14,9 +14,12 @@ import androidx.glance.background
 import androidx.glance.layout.Alignment
 import androidx.glance.layout.Column
 import androidx.glance.layout.Row
+import androidx.glance.layout.Spacer
 import androidx.glance.layout.fillMaxSize
 import androidx.glance.layout.padding
+import androidx.glance.layout.width
 import androidx.glance.text.Text
+import com.tecsup.lab14widgets.DestinosActivity
 import com.tecsup.lab14widgets.MainActivity
 
 /**
@@ -51,6 +54,11 @@ class SimpleWidgetContent : GlanceAppWidget() {
                 Button(
                     text = "Página Principal",
                     onClick = actionStartActivity<MainActivity>()
+                )
+                Spacer(modifier = GlanceModifier.width(8.dp))
+                Button(
+                    text = "Ver destinos",
+                    onClick = actionStartActivity<DestinosActivity>()
                 )
             }
         }
