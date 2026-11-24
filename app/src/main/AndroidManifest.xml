@@ -34,6 +34,7 @@
         <!-- Receiver del widget de Glance (Ejercicio 1) -->
         <receiver
             android:name=".widget.SimpleWidget"
+            android:label="Widget Ejercicio 1"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
@@ -46,6 +47,7 @@
         <!-- Widget personalizado del ejercicio final -->
         <receiver
             android:name=".widget.ProyectoWidget"
+            android:label="Mis notas (Canvas)"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
