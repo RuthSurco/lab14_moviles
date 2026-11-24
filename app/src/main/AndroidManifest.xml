@@ -24,11 +24,11 @@
             </intent-filter>
         </activity>
 
-        <!-- Segunda vista (parte 8): se abre desde el botón "Ver destinos" del widget -->
+        <!-- Segunda vista (parte 8): notas de Canvas, se abre desde el widget -->
         <activity
             android:name=".DestinosActivity"
             android:exported="false"
-            android:label="Destinos"
+            android:label="Notas (Canvas)"
             android:theme="@style/Theme.Lab14Widgets" />
 
         <!-- Receiver del widget de Glance (Ejercicio 1) -->

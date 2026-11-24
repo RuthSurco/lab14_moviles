@@ -28,36 +28,33 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-private data class Accion(val titulo: String, val detalle: String)
+private data class Nota(val curso: String, val calificacion: String)
 
 /**
- * Widget del ejercicio final: combina tres buenas prácticas vistas en Android UI Kit:
- *  - Accesos directos a funciones importantes (botones).
- *  - Información en tiempo real (hora del último update).
- *  - Lista de últimas acciones.
- *
- * El contenido es "glanceable": jerarquía clara, texto corto, buen contraste y padding.
+ * Widget del ejercicio final adaptado al proyecto: sistema de notas conectado a Canvas.
+ * Muestra promedio, hora de actualización, accesos directos y últimas notas.
  */
 class ProyectoWidgetContent : GlanceAppWidget() {
 
     override suspend fun provideGlance(context: Context, id: GlanceId) {
         val hora = SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date())
 
-        val acciones = listOf(
-            Accion("Último acceso", hora),
-            Accion("Tareas pendientes", "3 por revisar"),
-            Accion("Estado", "Sincronizado")
+        val notas = listOf(
+            Nota("Programación", "17"),
+            Nota("Cálculo", "16"),
+            Nota("Física", "15")
         )
+        val promedio = "16.0"
 
         provideContent {
             GlanceTheme {
-                ProyectoContent(hora = hora, acciones = acciones)
+                ProyectoContent(hora = hora, promedio = promedio, notas = notas)
             }
         }
     }
 
     @Composable
-    private fun ProyectoContent(hora: String, acciones: List<Accion>) {
+    private fun ProyectoContent(hora: String, promedio: String, notas: List<Nota>) {
         val colorTexto = GlanceTheme.colors.onBackground
 
         Column(
@@ -69,7 +66,7 @@ class ProyectoWidgetContent : GlanceAppWidget() {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = "Mi proyecto",
+                text = "Mis notas",
                 style = TextStyle(
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold,
@@ -78,8 +75,18 @@ class ProyectoWidgetContent : GlanceAppWidget() {
             )
 
             Text(
-                text = "Actualizado $hora",
-                style = TextStyle(fontSize = 12.sp, color = colorTexto),
+                text = "Promedio: $promedio / 20",
+                style = TextStyle(
+                    fontSize = 22.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = colorTexto
+                ),
+                modifier = GlanceModifier.padding(top = 4.dp)
+            )
+
+            Text(
+                text = "Canvas · Actualizado $hora",
+                style = TextStyle(fontSize = 11.sp, color = colorTexto),
                 modifier = GlanceModifier.padding(bottom = 8.dp)
             )
 
@@ -90,13 +97,13 @@ class ProyectoWidgetContent : GlanceAppWidget() {
                 )
                 Spacer(modifier = GlanceModifier.width(8.dp))
                 Button(
-                    text = "Destinos",
+                    text = "Ver notas",
                     onClick = actionStartActivity<DestinosActivity>()
                 )
             }
 
             Text(
-                text = "Últimas acciones",
+                text = "Últimas notas",
                 style = TextStyle(
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Bold,
@@ -105,9 +112,9 @@ class ProyectoWidgetContent : GlanceAppWidget() {
                 modifier = GlanceModifier.padding(top = 12.dp, bottom = 4.dp)
             )
 
-            acciones.forEach { accion ->
+            notas.forEach { nota ->
                 Text(
-                    text = "• ${accion.titulo}: ${accion.detalle}",
+                    text = "• ${nota.curso}: ${nota.calificacion}",
                     style = TextStyle(fontSize = 12.sp, color = colorTexto)
                 )
             }

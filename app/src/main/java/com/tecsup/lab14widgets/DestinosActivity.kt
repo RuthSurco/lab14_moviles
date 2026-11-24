@@ -16,8 +16,9 @@ import androidx.compose.ui.unit.dp
 import com.tecsup.lab14widgets.ui.theme.Lab14Theme
 
 /**
- * Segunda vista del laboratorio (parte 8).
- * El widget puede abrir esta pantalla directamente con actionStartActivity<DestinosActivity>().
+ * Segunda vista del laboratorio (parte 8), adaptada al proyecto:
+ * muestra las notas sincronizadas desde Canvas.
+ * El widget la abre con actionStartActivity<DestinosActivity>().
  */
 class DestinosActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -33,18 +34,30 @@ class DestinosActivity : ComponentActivity() {
                             .padding(24.dp)
                     ) {
                         Text(
-                            text = "Destinos",
+                            text = "Notas (Canvas)",
                             style = MaterialTheme.typography.headlineMedium
                         )
 
+                        Text(
+                            text = "Promedio general: 16.0 / 20",
+                            style = MaterialTheme.typography.titleLarge,
+                            modifier = Modifier.padding(top = 8.dp)
+                        )
+
+                        Text(
+                            text = "Datos sincronizados desde Canvas",
+                            style = MaterialTheme.typography.bodyMedium,
+                            modifier = Modifier.padding(top = 4.dp)
+                        )
+
                         listOf(
-                            "Página Principal",
-                            "Reportes",
-                            "Perfil",
-                            "Configuración"
-                        ).forEach { destino ->
+                            "Programación · 17",
+                            "Cálculo · 16",
+                            "Física · 15",
+                            "Base de datos · 16"
+                        ).forEach { nota ->
                             Text(
-                                text = "• $destino",
+                                text = "• $nota",
                                 style = MaterialTheme.typography.bodyLarge,
                                 modifier = Modifier.padding(top = 12.dp)
                             )
