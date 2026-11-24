@@ -28,7 +28,7 @@
         <activity
             android:name=".DestinosActivity"
             android:exported="false"
-            android:label="Notas (Canvas)"
+            android:label="Calendario"
             android:theme="@style/Theme.Lab14Widgets" />
 
         <!-- Receiver del widget de Glance (Ejercicio 1) -->
@@ -47,7 +47,7 @@
         <!-- Widget personalizado del ejercicio final -->
         <receiver
             android:name=".widget.ProyectoWidget"
-            android:label="Mis notas (Canvas)"
+            android:label="Calendario de entregas"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />

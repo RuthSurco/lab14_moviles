@@ -30,60 +30,88 @@ import androidx.glance.text.TextStyle
 import com.tecsup.lab14widgets.DestinosActivity
 import com.tecsup.lab14widgets.MainActivity
 import java.text.SimpleDateFormat
-import java.util.Date
+import java.util.Calendar
 import java.util.Locale
 
-private data class Nota(val curso: String, val calificacion: Int)
+private data class Entrega(val dia: Int, val titulo: String)
 
 /**
- * Widget del ejercicio final adaptado al proyecto: sistema de notas conectado a Canvas.
- * Diseño con identidad visual: cabecera de color, tarjeta de promedio y notas con acentos.
+ * Widget del ejercicio final: calendario de entregas del proyecto.
+ * Muestra el mes actual, resalta hoy y marca las fechas importantes con color.
  */
 class ProyectoWidgetContent : GlanceAppWidget() {
 
     override suspend fun provideGlance(context: Context, id: GlanceId) {
-        val hora = SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date())
+        val calendario = Calendar.getInstance()
+        val anio = calendario.get(Calendar.YEAR)
+        val mes = calendario.get(Calendar.MONTH)
+        val hoy = calendario.get(Calendar.DAY_OF_MONTH)
+        val nombreMes = SimpleDateFormat("MMMM", Locale.getDefault())
+            .format(calendario.time)
+            .replaceFirstChar { it.uppercase() }
 
-        val notas = listOf(
-            Nota("Programación", 17),
-            Nota("Cálculo", 16),
-            Nota("Física", 15)
+        val primerDia = Calendar.getInstance().apply { set(anio, mes, 1) }
+            .get(Calendar.DAY_OF_WEEK)
+        val offset = (primerDia + 5) % 7 // Lunes = 0
+        val diasEnMes = calendario.getActualMaximum(Calendar.DAY_OF_MONTH)
+
+        val celdas = mutableListOf<Int?>().apply {
+            repeat(offset) { add(null) }
+            addAll((1..diasEnMes).toList())
+            while (size % 7 != 0) add(null)
+        }
+        val semanas = celdas.chunked(7)
+
+        // Fechas de ejemplo: cámbialas por las entregas reales de tu proyecto.
+        val entregas = listOf(
+            Entrega(25, "Proyecto final"),
+            Entrega(30, "Laboratorio 14")
         )
-        val promedio = notas.map { it.calificacion }.average()
-        val promedioTexto = String.format(Locale.getDefault(), "%.1f", promedio)
 
         provideContent {
             GlanceTheme {
-                ProyectoContent(hora = hora, promedio = promedioTexto, notas = notas)
+                CalendarioContent(
+                    nombreMes = nombreMes,
+                    anio = anio,
+                    hoy = hoy,
+                    semanas = semanas,
+                    entregas = entregas
+                )
             }
         }
     }
 
     @Composable
-    private fun ProyectoContent(hora: String, promedio: String, notas: List<Nota>) {
-        val colorTexto = GlanceTheme.colors.onBackground
+    private fun CalendarioContent(
+        nombreMes: String,
+        anio: Int,
+        hoy: Int,
+        semanas: List<List<Int?>>,
+        entregas: List<Entrega>
+    ) {
+        val diasSemana = listOf("L", "M", "M", "J", "V", "S", "D")
+        val fechaCorta = nombreMes.take(3)
 
         Column(
             modifier = GlanceModifier
                 .fillMaxSize()
                 .padding(12.dp)
                 .background(GlanceTheme.colors.widgetBackground)
-                .cornerRadius(16.dp),
-            verticalAlignment = Alignment.Top,
+                .cornerRadius(18.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Cabecera con color de marca
+            // Cabecera
             Row(
                 modifier = GlanceModifier
                     .fillMaxWidth()
                     .background(GlanceTheme.colors.primaryContainer)
-                    .cornerRadius(12.dp)
+                    .cornerRadius(14.dp)
                     .padding(12.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Column(modifier = GlanceModifier.defaultWeight()) {
                     Text(
-                        text = "Mis notas",
+                        text = "Calendario",
                         style = TextStyle(
                             fontSize = 18.sp,
                             fontWeight = FontWeight.Bold,
@@ -91,9 +119,9 @@ class ProyectoWidgetContent : GlanceAppWidget() {
                         )
                     )
                     Text(
-                        text = "Canvas · Actualizado $hora",
+                        text = "$nombreMes $anio",
                         style = TextStyle(
-                            fontSize = 11.sp,
+                            fontSize = 12.sp,
                             color = GlanceTheme.colors.onPrimaryContainer
                         )
                     )
@@ -106,36 +134,89 @@ class ProyectoWidgetContent : GlanceAppWidget() {
                 ) {}
             }
 
-            Spacer(modifier = GlanceModifier.height(10.dp))
+            Spacer(modifier = GlanceModifier.height(8.dp))
 
-            // Tarjeta del promedio
-            Column(
-                modifier = GlanceModifier
-                    .fillMaxWidth()
-                    .background(GlanceTheme.colors.secondaryContainer)
-                    .cornerRadius(12.dp)
-                    .padding(12.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Text(
-                    text = "PROMEDIO GENERAL",
-                    style = TextStyle(
-                        fontSize = 10.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = GlanceTheme.colors.onSecondaryContainer
+            // Días de la semana
+            Row(horizontalAlignment = Alignment.CenterHorizontally) {
+                diasSemana.forEach { dia ->
+                    Text(
+                        text = dia,
+                        modifier = GlanceModifier.defaultWeight(),
+                        style = TextStyle(
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = GlanceTheme.colors.onSurfaceVariant
+                        )
                     )
-                )
-                Text(
-                    text = "$promedio / 20",
-                    style = TextStyle(
-                        fontSize = 26.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = GlanceTheme.colors.onSecondaryContainer
-                    )
-                )
+                }
             }
 
-            Spacer(modifier = GlanceModifier.height(10.dp))
+            Spacer(modifier = GlanceModifier.height(4.dp))
+
+            // Cuadrícula del mes
+            semanas.forEach { semana ->
+                Row(horizontalAlignment = Alignment.CenterHorizontally) {
+                    semana.forEach { dia ->
+                        if (dia == null) {
+                            Spacer(modifier = GlanceModifier.size(30.dp))
+                        } else {
+                            val esEntrega = entregas.any { it.dia == dia }
+                            val esHoy = dia == hoy
+                            val fondo = when {
+                                esEntrega -> GlanceTheme.colors.tertiaryContainer
+                                esHoy -> GlanceTheme.colors.primary
+                                else -> GlanceTheme.colors.surfaceVariant
+                            }
+                            val colorTexto = when {
+                                esEntrega -> GlanceTheme.colors.onTertiaryContainer
+                                esHoy -> GlanceTheme.colors.onPrimary
+                                else -> GlanceTheme.colors.onSurfaceVariant
+                            }
+                            Box(
+                                modifier = GlanceModifier
+                                    .size(30.dp)
+                                    .background(fondo)
+                                    .cornerRadius(8.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = dia.toString(),
+                                    style = TextStyle(
+                                        fontSize = 12.sp,
+                                        fontWeight = if (esEntrega || esHoy) FontWeight.Bold else FontWeight.Normal,
+                                        color = colorTexto
+                                    )
+                                )
+                            }
+                            Spacer(modifier = GlanceModifier.width(2.dp))
+                        }
+                    }
+                }
+                Spacer(modifier = GlanceModifier.height(2.dp))
+            }
+
+            Spacer(modifier = GlanceModifier.height(6.dp))
+
+            Text(
+                text = "Próximas entregas",
+                style = TextStyle(
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = GlanceTheme.colors.onBackground
+                ),
+                modifier = GlanceModifier.fillMaxWidth()
+            )
+
+            Text(
+                text = entregas.joinToString("\n") { "• ${it.dia} $fechaCorta · ${it.titulo}" },
+                style = TextStyle(
+                    fontSize = 11.sp,
+                    color = GlanceTheme.colors.onBackground
+                ),
+                modifier = GlanceModifier.fillMaxWidth().padding(top = 2.dp)
+            )
+
+            Spacer(modifier = GlanceModifier.height(8.dp))
 
             Row(horizontalAlignment = Alignment.CenterHorizontally) {
                 Button(
@@ -144,50 +225,9 @@ class ProyectoWidgetContent : GlanceAppWidget() {
                 )
                 Spacer(modifier = GlanceModifier.width(8.dp))
                 Button(
-                    text = "Ver notas",
+                    text = "Ver calendario",
                     onClick = actionStartActivity<DestinosActivity>()
                 )
-            }
-
-            Spacer(modifier = GlanceModifier.height(10.dp))
-
-            Text(
-                text = "Últimas notas",
-                style = TextStyle(
-                    fontSize = 13.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = colorTexto
-                ),
-                modifier = GlanceModifier.padding(bottom = 6.dp)
-            )
-
-            notas.forEach { nota ->
-                Row(
-                    modifier = GlanceModifier
-                        .fillMaxWidth()
-                        .background(GlanceTheme.colors.surfaceVariant)
-                        .cornerRadius(8.dp)
-                        .padding(horizontal = 10.dp, vertical = 6.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = nota.curso,
-                        modifier = GlanceModifier.defaultWeight(),
-                        style = TextStyle(fontSize = 12.sp, color = GlanceTheme.colors.onSurfaceVariant)
-                    )
-                    Text(
-                        text = nota.calificacion.toString(),
-                        style = TextStyle(
-                            fontSize = 14.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = if (nota.calificacion >= 16)
-                                GlanceTheme.colors.primary
-                            else
-                                GlanceTheme.colors.tertiary
-                        )
-                    )
-                }
-                Spacer(modifier = GlanceModifier.height(4.dp))
             }
         }
     }
