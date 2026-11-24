@@ -4,11 +4,11 @@ import android.content.Context
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.glance.Button
 import androidx.glance.GlanceId
 import androidx.glance.GlanceModifier
 import androidx.glance.GlanceTheme
 import androidx.glance.action.actionStartActivity
+import androidx.glance.action.clickable
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.cornerRadius
 import androidx.glance.appwidget.provideContent
@@ -28,7 +28,6 @@ import androidx.glance.text.FontWeight
 import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
 import com.tecsup.lab14widgets.DestinosActivity
-import com.tecsup.lab14widgets.MainActivity
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
@@ -90,14 +89,14 @@ class ProyectoWidgetContent : GlanceAppWidget() {
         entregas: List<Entrega>
     ) {
         val diasSemana = listOf("L", "M", "M", "J", "V", "S", "D")
-        val fechaCorta = nombreMes.take(3)
 
         Column(
             modifier = GlanceModifier
                 .fillMaxSize()
                 .padding(12.dp)
                 .background(GlanceTheme.colors.widgetBackground)
-                .cornerRadius(18.dp),
+                .cornerRadius(18.dp)
+                .clickable(actionStartActivity<DestinosActivity>()),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             // Cabecera
@@ -193,41 +192,6 @@ class ProyectoWidgetContent : GlanceAppWidget() {
                     }
                 }
                 Spacer(modifier = GlanceModifier.height(2.dp))
-            }
-
-            Spacer(modifier = GlanceModifier.height(6.dp))
-
-            Text(
-                text = "Próximas entregas",
-                style = TextStyle(
-                    fontSize = 13.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = GlanceTheme.colors.onBackground
-                ),
-                modifier = GlanceModifier.fillMaxWidth()
-            )
-
-            Text(
-                text = entregas.joinToString("\n") { "• ${it.dia} $fechaCorta · ${it.titulo}" },
-                style = TextStyle(
-                    fontSize = 11.sp,
-                    color = GlanceTheme.colors.onBackground
-                ),
-                modifier = GlanceModifier.fillMaxWidth().padding(top = 2.dp)
-            )
-
-            Spacer(modifier = GlanceModifier.height(8.dp))
-
-            Row(horizontalAlignment = Alignment.CenterHorizontally) {
-                Button(
-                    text = "Inicio",
-                    onClick = actionStartActivity<MainActivity>()
-                )
-                Spacer(modifier = GlanceModifier.width(8.dp))
-                Button(
-                    text = "Ver calendario",
-                    onClick = actionStartActivity<DestinosActivity>()
-                )
             }
         }
     }
