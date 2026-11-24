@@ -37,6 +37,7 @@ private data class Entrega(val dia: Int, val titulo: String)
 /**
  * Widget del ejercicio final: calendario de entregas del proyecto.
  * Muestra el mes actual, resalta hoy y marca las fechas importantes con color.
+ * Al tocarlo se abre la pantalla con el detalle de las entregas.
  */
 class ProyectoWidgetContent : GlanceAppWidget() {
 
@@ -74,7 +75,7 @@ class ProyectoWidgetContent : GlanceAppWidget() {
                     anio = anio,
                     hoy = hoy,
                     semanas = semanas,
-                    entregas = entregas
+                    diasEntregas = entregas.map { it.dia }.toSet()
                 )
             }
         }
@@ -86,25 +87,26 @@ class ProyectoWidgetContent : GlanceAppWidget() {
         anio: Int,
         hoy: Int,
         semanas: List<List<Int?>>,
-        entregas: List<Entrega>
+        diasEntregas: Set<Int>
     ) {
         val diasSemana = listOf("L", "M", "M", "J", "V", "S", "D")
+        val tamanoCelda = 32.dp
 
         Column(
             modifier = GlanceModifier
                 .fillMaxSize()
                 .padding(12.dp)
                 .background(GlanceTheme.colors.widgetBackground)
-                .cornerRadius(18.dp)
+                .cornerRadius(20.dp)
                 .clickable(actionStartActivity<DestinosActivity>()),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Cabecera
+            // Cabecera con color de marca
             Row(
                 modifier = GlanceModifier
                     .fillMaxWidth()
                     .background(GlanceTheme.colors.primaryContainer)
-                    .cornerRadius(14.dp)
+                    .cornerRadius(16.dp)
                     .padding(12.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -125,73 +127,97 @@ class ProyectoWidgetContent : GlanceAppWidget() {
                         )
                     )
                 }
+                // Contador de entregas como acento visual
                 Box(
                     modifier = GlanceModifier
-                        .size(12.dp)
+                        .size(30.dp)
                         .background(GlanceTheme.colors.tertiary)
-                        .cornerRadius(6.dp)
-                ) {}
-            }
-
-            Spacer(modifier = GlanceModifier.height(8.dp))
-
-            // Días de la semana
-            Row(horizontalAlignment = Alignment.CenterHorizontally) {
-                diasSemana.forEach { dia ->
+                        .cornerRadius(15.dp),
+                    contentAlignment = Alignment.Center
+                ) {
                     Text(
-                        text = dia,
-                        modifier = GlanceModifier.defaultWeight(),
+                        text = diasEntregas.size.toString(),
                         style = TextStyle(
-                            fontSize = 11.sp,
+                            fontSize = 13.sp,
                             fontWeight = FontWeight.Bold,
-                            color = GlanceTheme.colors.onSurfaceVariant
+                            color = GlanceTheme.colors.onTertiary
                         )
                     )
                 }
             }
 
-            Spacer(modifier = GlanceModifier.height(4.dp))
+            Spacer(modifier = GlanceModifier.height(10.dp))
 
-            // Cuadrícula del mes
-            semanas.forEach { semana ->
-                Row(horizontalAlignment = Alignment.CenterHorizontally) {
-                    semana.forEach { dia ->
-                        if (dia == null) {
-                            Spacer(modifier = GlanceModifier.size(30.dp))
-                        } else {
-                            val esEntrega = entregas.any { it.dia == dia }
-                            val esHoy = dia == hoy
-                            val fondo = when {
-                                esEntrega -> GlanceTheme.colors.tertiaryContainer
-                                esHoy -> GlanceTheme.colors.primary
-                                else -> GlanceTheme.colors.surfaceVariant
-                            }
-                            val colorTexto = when {
-                                esEntrega -> GlanceTheme.colors.onTertiaryContainer
-                                esHoy -> GlanceTheme.colors.onPrimary
-                                else -> GlanceTheme.colors.onSurfaceVariant
-                            }
-                            Box(
-                                modifier = GlanceModifier
-                                    .size(30.dp)
-                                    .background(fondo)
-                                    .cornerRadius(8.dp),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text(
-                                    text = dia.toString(),
-                                    style = TextStyle(
-                                        fontSize = 12.sp,
-                                        fontWeight = if (esEntrega || esHoy) FontWeight.Bold else FontWeight.Normal,
-                                        color = colorTexto
-                                    )
+            // Ancho fijo para que letras y números queden en la misma columna
+            Column(modifier = GlanceModifier.width(tamanoCelda * 7)) {
+                // Días de la semana
+                Row {
+                    diasSemana.forEach { dia ->
+                        Box(
+                            modifier = GlanceModifier.size(tamanoCelda),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = dia,
+                                style = TextStyle(
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = GlanceTheme.colors.onSurfaceVariant
                                 )
-                            }
-                            Spacer(modifier = GlanceModifier.width(2.dp))
+                            )
                         }
                     }
                 }
-                Spacer(modifier = GlanceModifier.height(2.dp))
+
+                Spacer(modifier = GlanceModifier.height(6.dp))
+
+                // Cuadrícula del mes: 7 hijos por fila (Glance admite máximo 10)
+                semanas.forEach { semana ->
+                    Row {
+                        semana.forEach { dia ->
+                            Box(
+                                modifier = GlanceModifier.size(tamanoCelda),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                if (dia == null) {
+                                    // Celda vacía: no se muestra nada
+                                } else {
+                                    val esEntrega = dia in diasEntregas
+                                    val esHoy = dia == hoy
+                                    val fondo = when {
+                                        esEntrega -> GlanceTheme.colors.tertiaryContainer
+                                        esHoy -> GlanceTheme.colors.primary
+                                        else -> GlanceTheme.colors.surfaceVariant
+                                    }
+                                    val colorTexto = when {
+                                        esEntrega -> GlanceTheme.colors.onTertiaryContainer
+                                        esHoy -> GlanceTheme.colors.onPrimary
+                                        else -> GlanceTheme.colors.onSurfaceVariant
+                                    }
+                                    Box(
+                                        modifier = GlanceModifier
+                                            .size(28.dp)
+                                            .background(fondo)
+                                            .cornerRadius(14.dp),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Text(
+                                            text = dia.toString(),
+                                            style = TextStyle(
+                                                fontSize = 12.sp,
+                                                fontWeight = if (esEntrega || esHoy)
+                                                    FontWeight.Bold
+                                                else
+                                                    FontWeight.Normal,
+                                                color = colorTexto
+                                            )
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
     }
